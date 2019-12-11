@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
 import android.util.Log;
@@ -56,6 +57,7 @@ import com.google.android.material.snackbar.Snackbar;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -184,6 +186,18 @@ public class LoginActivity extends AppCompatActivity{
                 Log.e( Resource.TAG_LOG_ERROR , "ERROR :: " + error.getMessage());
             }
         });
+
+        Log.i(Resource.TAG_LOG_INFO , "-- -- -- " + Environment.getExternalStorageDirectory().toString());
+        String path = Environment.getExternalStorageDirectory().toString()+"/Pictures";
+        Log.i(Resource.TAG_LOG_INFO , "-- -- -- " + "Path: " + path);
+
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        Log.d("Files", "Size: "+ files.length);
+        for (int i = 0; i < files.length; i++)
+        {
+            Log.i("Files", "FileName:" + files[i].getName());
+        }
 
     }
 
