@@ -1,8 +1,8 @@
 package citybugs.seruvent.org.tr.citybugs.ui.home;
 
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.ViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 public class HomeViewModel extends ViewModel {
 
@@ -10,7 +10,7 @@ public class HomeViewModel extends ViewModel {
 
     public HomeViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("Şikayetinizi hemen başvurun...");
+        mText.setValue("This is home fragment");
     }
 
     public LiveData<String> getText() {

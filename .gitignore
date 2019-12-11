@@ -1,3 +1,9 @@
+# KEYS
+app/google-services.json
+
+# OSX 
+.DS_Store
+
 # Built application files
 *.apk
 *.aar
