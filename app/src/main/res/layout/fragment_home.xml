@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,24 +20,27 @@
         android:visibility="gone"/>
 
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/event_application_main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/event_application_main"
-        android:visibility="visible">
+        android:visibility="visible"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="54dp">
 
         <TextView
             android:id="@+id/text_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="28dp"
             android:layout_marginEnd="8dp"
+            android:text="@string/bug_application_title"
             android:textAlignment="center"
             android:textSize="20sp"
-            android:text="@string/bug_application_title"
+            app:layout_constraintBottom_toTopOf="@+id/event_image_1"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,12 +49,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Başvur"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/event_image_1"
@@ -58,9 +61,23 @@
             android:layout_height="119dp"
             app:layout_constraintBottom_toTopOf="@+id/create_event_button"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.696"
             app:srcCompat="@android:drawable/ic_input_add" />
+
+        <EditText
+            android:id="@+id/event_application_desc"
+            android:layout_width="331dp"
+            android:layout_height="38dp"
+            android:hint="Şikayet Başlığını Yazınız..."
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/create_event_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.496"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/event_image_1" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

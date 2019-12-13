@@ -9,18 +9,18 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -31,6 +31,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -40,12 +42,9 @@ import com.google.firebase.storage.UploadTask;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -54,7 +53,6 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import citybugs.seruvent.org.tr.citybugs.R;
 import citybugs.seruvent.org.tr.citybugs.util.Resource;
-import citybugs.seruvent.org.tr.citybugs.util.Result;
 
 public class HomeFragment extends Fragment {
 
@@ -64,10 +62,13 @@ public class HomeFragment extends Fragment {
     private final int GALLERY_REQUEST_CODE = 106;
     private View view;
     private Button bugApplicationButton;
+    private EditText bugApplicationDecsription;
     private Uri imageUri;
     private String imageFirebasePath;
     private View mProgressView;
     private View mFormView;
+    private FusedLocationProviderClient fusedLocationClient;
+    private String locationStr;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -77,6 +78,7 @@ public class HomeFragment extends Fragment {
 
 
         // -1- Initialization
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
         mFormView = view.findViewById(R.id.event_application_main);
         mProgressView = view.findViewById(R.id.event_application_progressbar);
         final TextView textView = view.findViewById(R.id.text_home);
@@ -111,6 +113,7 @@ public class HomeFragment extends Fragment {
         });
 
 
+        bugApplicationDecsription = view.findViewById(R.id.event_application_desc);
         bugApplicationButton = view.findViewById(R.id.create_event_button);
         bugApplicationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,39 +193,68 @@ public class HomeFragment extends Fragment {
                 case GALLERY_REQUEST_CODE:
                     Glide.with(view).load(data.getData()).into(imageView);
                     bugApplicationButton.setVisibility(View.VISIBLE);
+                    bugApplicationDecsription.setVisibility(View.VISIBLE);
                     imageUri = data.getData();
                     break;
             }
     }
 
-    public void uploadImagesFirebaseAndBugApplication(Uri uri){
+    public void uploadImagesFirebaseAndBugApplication(final Uri uri){
 
         showProgress(true);
-        StorageReference fileRef = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtension(uri));
-        UploadTask uploadTask = fileRef.putFile(uri);
-        imageFirebasePath = null;
 
-        // Register observers to listen for when the download is done or if it fails
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-                Log.e(Resource.TAG_LOG_INFO , "CITYBUGS file error");
-                showProgress(false);
+        fusedLocationClient.getLastLocation()
+            .addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
 
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-                Log.i(Resource.TAG_LOG_INFO , "CITYBUGS file uploaded :: " + taskSnapshot.getMetadata().getPath());
-                imageFirebasePath = taskSnapshot.getMetadata().getPath();
+                    // -1- Got last known location. In some rare situations this can be null.
+                    if (location != null) {
 
-                requestEventApplication(imageFirebasePath);
+                        // -1.1- GET LOCATION - Logic to handle location object
+                        locationStr = location.getLatitude() + ":" + location.getLongitude();
+                        Log.i(Resource.TAG_LOG_INFO , "Latitude::" + location.getLatitude() + " - Longitude::" + location.getLongitude());
 
-            }
-        });
+                        // -1.2- START TO UPLOAD IMAGE
+                        StorageReference fileRef = mStorageRef.child(System.currentTimeMillis() + "." + getFileExtension(uri));
+                        UploadTask uploadTask = fileRef.putFile(uri);
+                        imageFirebasePath = null;
+
+                        // -1.3- Register observers to listen for when the download is done or if it fails
+                        uploadTask.addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception exception) {
+                                // Handle unsuccessful uploads
+                                Log.e(Resource.TAG_LOG_INFO , "CITYBUGS file error");
+                                showProgress(false);
+
+                            }
+                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                                // ...
+                                Log.i(Resource.TAG_LOG_INFO , "CITYBUGS file uploaded :: " + taskSnapshot.getMetadata().getPath());
+                                imageFirebasePath = taskSnapshot.getMetadata().getPath();
+                                requestEventApplication(imageFirebasePath);
+
+                            }
+                        });
+
+                    // -2- Location null
+                    }else{
+                        showProgress(false);
+                        Log.e(Resource.TAG_LOG_ERROR , "LOCATION NULL");
+                    }
+                }
+            })
+            .addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    showProgress(false);
+                    Log.e(Resource.TAG_LOG_ERROR , "LOCATION ERROR");
+                }
+            });
 
     }
 
@@ -230,9 +262,9 @@ public class HomeFragment extends Fragment {
     private void requestEventApplication(String imgUrl){
         try{
             JSONObject jsonBody = new JSONObject();
-            jsonBody.put("title", "MOBILE TEST - title");
+            jsonBody.put("title", bugApplicationDecsription.getText());
             jsonBody.put("description", "MOBILE TEST - description");
-            jsonBody.put("gpsLocation", "MOBILE TEST - gpsLocation");
+            jsonBody.put("gpsLocation", locationStr);
 
             JSONObject eventResource = new JSONObject();
             eventResource.put("url", imgUrl);
