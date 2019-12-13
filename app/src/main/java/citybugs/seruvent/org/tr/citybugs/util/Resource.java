@@ -5,6 +5,7 @@ public class Resource {
     public static String DOMAIN_NAME = "http://161.9.195.122:8080";
     public static String DOMAIN_API = DOMAIN_NAME + "/api";
     public static String DOMAIN_API_AUTHENTICATION = DOMAIN_API + "/authenticate";
+    public static String DOMAIN_API_EVENT_CREATE = DOMAIN_API + "/event";
 
     public static String TAG_LOG_ERROR = "SERUVENT_ERROR";
     public static String TAG_LOG_INFO = "SERUVENT_INFO";
