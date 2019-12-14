@@ -1,5 +1,8 @@
 <resources>
 
+    <!-- APP KEYS -->
+    <string name="app_name">CityBugs</string>
+
     <!-- FACEBOOK -->
     <string name="facebook_app_id">2587679398130133</string>
     <string name="fb_login_protocol_scheme">fb2587679398130133</string>
@@ -7,7 +10,11 @@
     <!-- LAYOUT Statics -->
     <string name="bug_application_title">Talep/Şikayetlerinizi resimlerinizle hemen yapın</string>
 
-    <string name="app_name">CityBugs</string>
+    <!-- UNKNOWN KEYS -->
+    <string name="unknown_name">(??????)</string>
+    <string name="unknown_phone">(???)??? ?? ??</string>
+    <string name="unknown_mail">(???@???)</string>
+    <string name="empty_text">-</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
