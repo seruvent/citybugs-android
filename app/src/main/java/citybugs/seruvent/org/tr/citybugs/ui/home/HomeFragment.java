@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -76,7 +77,6 @@ public class HomeFragment extends Fragment {
                 ViewModelProviders.of(this).get(HomeViewModel.class);
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
-
         // -1- Initialization
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
         mFormView = view.findViewById(R.id.event_application_main);
@@ -100,7 +100,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View view)
             {
-
                 Intent intent=new Intent(Intent.ACTION_GET_CONTENT);
                 // Sets the type as image/*. This ensures only components of type image are selected
                 intent.setType("image/*");
@@ -108,7 +107,6 @@ public class HomeFragment extends Fragment {
                 String[] mimeTypes = {"image/jpeg", "image/png"};
                 intent.putExtra(Intent.EXTRA_MIME_TYPES,mimeTypes);
                 startActivityForResult(intent,GALLERY_REQUEST_CODE);
-
             }
         });
 
@@ -127,10 +125,7 @@ public class HomeFragment extends Fragment {
                 builder.setPositiveButton("Evet", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
                         uploadImagesFirebaseAndBugApplication(imageUri);
-
-
                     }
                 });
                 builder.show();
@@ -296,7 +291,11 @@ public class HomeFragment extends Fragment {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String>  params = new HashMap<String, String>();
-                    params.put("AuthXXX", "Bearer YYY");
+                    SharedPreferences sharedPref = getActivity().getSharedPreferences(Resource.SHARED_PREF_NAME , Context.MODE_PRIVATE);
+                    String authorizationValue = "Bearer " + (sharedPref.getString("TOKEN", ""));
+                    Log.i(Resource.TAG_LOG_INFO , "----- ----- HEADER ----- -----");
+                    Log.i(Resource.TAG_LOG_INFO , "Authorization " + authorizationValue);
+                    params.put("Authorization", authorizationValue);
                     return params;
                 }
             } ;

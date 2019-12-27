@@ -82,7 +82,7 @@ public class DashboardFragment extends Fragment {
 
                             eventListAdapter.addEventList(Event.EventList(contentArray));
                             ListView listView = view.findViewById(R.id.fragment_event_list_view_main);
-                            Log.i(Resource.TAG_LOG_INFO , "-- -- -- 4");
+                            Log.i(Resource.TAG_LOG_INFO , "-- -- --");
                             if(listView.getAdapter()==null)
                                 listView.setAdapter(eventListAdapter);
                             else{

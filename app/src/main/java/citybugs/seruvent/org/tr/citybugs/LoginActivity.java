@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -45,7 +44,6 @@ public class LoginActivity extends AppCompatActivity{
     private CallbackManager callbackManager;
     private Context context=null;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,12 +62,13 @@ public class LoginActivity extends AppCompatActivity{
         loginFacebookButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                Log.i( Resource.TAG_LOG_INFO , "FacebookCallback.onSuccess :: " + loginResult.toString());
                 requestAuthentication(loginResult.getAccessToken().getToken());
             }
 
             @Override
             public void onCancel() {
-                Log.i( Resource.TAG_LOG_INFO , "CANCELLED");
+                Log.w( Resource.TAG_LOG_WARNING, "CANCELLED");
             }
 
             @Override
@@ -88,12 +87,17 @@ public class LoginActivity extends AppCompatActivity{
         showProgress(true);
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean hasFacebookAccessToken = accessToken != null && !accessToken.isExpired();
-        boolean hasApplicationToken = SeruventToken.getCurrentAccessToken(this) != null;
         if(hasFacebookAccessToken){
             requestAuthentication(accessToken.getToken());
         }else{
             showProgress(false);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        Log.i(Resource.TAG_LOG_INFO , "LoginActivity.onSaveInstanceState :: called");
     }
 
 
@@ -158,14 +162,15 @@ public class LoginActivity extends AppCompatActivity{
             JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, Resource.DOMAIN_API_AUTHENTICATION,  jsonBody ,  new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
+                    Log.i(Resource.TAG_LOG_INFO, Resource.DOMAIN_API_AUTHENTICATION + " :: onResponse :: ["+response.toString()+"]");
                     try{
-                        context.getSharedPreferences(Resource.SHARED_PREF_NAME , Context.MODE_PRIVATE).edit().putString("TOKEN" , response.get("token").toString());
-                        context.getSharedPreferences(Resource.SHARED_PREF_NAME , Context.MODE_PRIVATE).edit().commit();
+                        context.getSharedPreferences(Resource.SHARED_PREF_NAME , Context.MODE_PRIVATE).edit().putString("TOKEN" , response.get("token").toString()).apply();
                         Log.i(Resource.TAG_LOG_INFO , "[URL:"+Resource.DOMAIN_API_AUTHENTICATION+"][Response"+ response.toString() +"]");
 
                         // Redirect to MainActivity
                         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                         myIntent.putExtra("seruvent-key", "seruvent-value"); //Optional parameters
+                        myIntent.putExtra("TOKEN", response.get("token").toString()); //Optional parameters
                         startActivity(myIntent);
 
                     } catch (Exception e){
@@ -189,7 +194,9 @@ public class LoginActivity extends AppCompatActivity{
     AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
         @Override
         protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-
+            String oldAccessTokenStr = oldAccessToken!=null?oldAccessToken.getToken():"NULL";
+            String currentAccessTokenStr = currentAccessToken!=null?currentAccessToken.getToken():"NULL";
+            Log.w(Resource.TAG_LOG_WARNING , "onCurrentAccessTokenChanged called :: [oldAccessToken="+oldAccessTokenStr+"][currentAccessToken="+currentAccessTokenStr+"]");
         }
     };
 
